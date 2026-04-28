@@ -147,4 +147,29 @@ class MealPlanPrescriptionTest extends TestCase
 
         $this->assertDatabaseCount('meal_plans', 0);
     }
+
+    public function test_sistema_bloqueia_refeicao_com_horario_em_formato_invalido(): void
+    {
+        $patient = Patient::create([
+            'full_name' => 'Gabriel Nunes',
+            'age' => 30,
+            'goal' => 'Aumentar energia diaria',
+        ]);
+
+        $this->from(route('nutrition.meal-plans.create', $patient))
+            ->post(route('nutrition.meal-plans.store', $patient), [
+                'plan_date' => '2026-04-28',
+                'meals' => [
+                    [
+                        'name' => 'Ceia',
+                        'time' => '21 horas',
+                        'description' => 'Leite, aveia e canela.',
+                    ],
+                ],
+            ])
+            ->assertRedirect(route('nutrition.meal-plans.create', $patient))
+            ->assertSessionHasErrors(['meals.0.time']);
+
+        $this->assertDatabaseCount('meal_plans', 0);
+    }
 }
