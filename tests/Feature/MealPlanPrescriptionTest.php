@@ -128,4 +128,23 @@ class MealPlanPrescriptionTest extends TestCase
         $this->get(route('student.meal-plans.show', [$otherPatient, $mealPlan]))
             ->assertNotFound();
     }
+
+    public function test_sistema_bloqueia_salvamento_sem_nenhuma_refeicao(): void
+    {
+        $patient = Patient::create([
+            'full_name' => 'Fernanda Alves',
+            'age' => 27,
+            'goal' => 'Melhorar habitos alimentares',
+        ]);
+
+        $this->from(route('nutrition.meal-plans.create', $patient))
+            ->post(route('nutrition.meal-plans.store', $patient), [
+                'plan_date' => '2026-04-28',
+                'meals' => [],
+            ])
+            ->assertRedirect(route('nutrition.meal-plans.create', $patient))
+            ->assertSessionHasErrors(['meals']);
+
+        $this->assertDatabaseCount('meal_plans', 0);
+    }
 }
