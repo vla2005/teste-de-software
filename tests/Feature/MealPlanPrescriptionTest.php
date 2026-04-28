@@ -98,4 +98,34 @@ class MealPlanPrescriptionTest extends TestCase
             ->assertSee('Almoco')
             ->assertSee('Arroz, feijao, frango grelhado e salada.');
     }
+
+    public function test_plano_alimentar_nao_e_exibido_para_aluno_diferente_do_vinculado(): void
+    {
+        $patient = Patient::create([
+            'full_name' => 'Diego Lima',
+            'age' => 22,
+            'goal' => 'Reeducacao alimentar',
+        ]);
+
+        $otherPatient = Patient::create([
+            'full_name' => 'Elaine Rocha',
+            'age' => 35,
+            'goal' => 'Controle de peso',
+        ]);
+
+        $mealPlan = $patient->mealPlans()->create([
+            'plan_date' => '2026-04-28',
+            'notes' => 'Plano vinculado ao Diego.',
+        ]);
+
+        $mealPlan->meals()->create([
+            'name' => 'Jantar',
+            'time' => '19:30',
+            'description' => 'Sopa de legumes com frango desfiado.',
+            'instructions' => 'Evitar frituras no periodo noturno.',
+        ]);
+
+        $this->get(route('student.meal-plans.show', [$otherPatient, $mealPlan]))
+            ->assertNotFound();
+    }
 }
