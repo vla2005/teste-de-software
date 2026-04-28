@@ -172,4 +172,31 @@ class MealPlanPrescriptionTest extends TestCase
 
         $this->assertDatabaseCount('meal_plans', 0);
     }
+   
+    public function test_salvamento_persiste_observacoes_gerais_do_plano(): void
+    {
+        $patient = Patient::create([
+            'full_name' => 'Henrique Ramos',
+            'age' => 33,
+            'goal' => 'Reducao de gordura corporal',
+        ]);
+
+        $this->post(route('nutrition.meal-plans.store', $patient), [
+            'plan_date' => '2026-04-28',
+            'notes' => 'Beber pelo menos dois litros de agua por dia.',
+            'meals' => [
+                [
+                    'name' => 'Lanche da tarde',
+                    'time' => '16:00',
+                    'description' => 'Iogurte natural com frutas.',
+                    'instructions' => 'Consumir antes do treino.',
+                ],
+            ],
+        ]);
+
+        $mealPlan = MealPlan::query()->whereBelongsTo($patient)->firstOrFail();
+
+        $this->assertSame('2026-04-28', $mealPlan->plan_date->format('Y-m-d'));
+        $this->assertSame('Beber pelo menos dois litros de agua por dia.', $mealPlan->notes);
+    }
 }
