@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Prescrever plano alimentar</title>
+    <title>Editar plano alimentar</title>
     <link rel="stylesheet" href="{{ asset('nutritreino.css') }}">
 </head>
 <body>
@@ -19,7 +19,7 @@
     <main class="page">
         <div class="section-header">
             <div>
-                <h1>Prescrever plano alimentar</h1>
+                <h1>Editar plano alimentar</h1>
                 <p class="lead">{{ $patient->full_name }} - {{ $patient->age }} anos - {{ $patient->goal }}</p>
             </div>
         </div>
@@ -30,23 +30,25 @@
             </div>
         @endif
 
-        <form class="form-panel stack" method="POST" action="{{ route('nutrition.meal-plans.store', $patient) }}">
+        <form class="form-panel stack" method="POST" action="{{ route('nutrition.meal-plans.update', [$patient, $mealPlan]) }}">
             @csrf
+            @method('PUT')
 
             <div class="form-grid">
                 <label>
                     Data do plano
-                    <input type="date" name="plan_date" value="{{ old('plan_date') }}" required>
+                    <input type="date" name="plan_date" value="{{ old('plan_date', $mealPlan->plan_date->format('Y-m-d')) }}" required>
                 </label>
 
                 <label class="full">
                     Observacoes gerais
-                    <textarea name="notes">{{ old('notes') }}</textarea>
+                    <textarea name="notes">{{ old('notes', $mealPlan->notes) }}</textarea>
                 </label>
             </div>
 
             @php
-                $meals = old('meals', [[]]);
+                $meals = old('meals', $mealPlan->meals->map(fn ($meal) => $meal->only(['name', 'time', 'description', 'instructions']))->toArray());
+                $meals = count($meals) > 0 ? $meals : [[]];
             @endphp
 
             <section class="stack" aria-label="Refeicoes">
@@ -63,8 +65,8 @@
             </section>
 
             <div class="actions">
-                <button class="btn" type="submit">Salvar plano alimentar</button>
-                <a class="btn secondary" href="{{ route('nutrition.meal-plans.index', $patient) }}">Cancelar</a>
+                <button class="btn" type="submit">Atualizar plano alimentar</button>
+                <a class="btn secondary" href="{{ route('student.meal-plans.show', [$patient, $mealPlan]) }}">Cancelar</a>
             </div>
         </form>
 

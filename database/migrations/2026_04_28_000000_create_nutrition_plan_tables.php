@@ -10,8 +10,11 @@ return new class extends Migration
     {
         Schema::create('patients', function (Blueprint $table) {
             $table->id();
-            $table->string('full_name');
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('full_name')->nullable();
             $table->unsignedTinyInteger('age');
+            $table->decimal('weight', 5, 2)->nullable();
+            $table->decimal('height', 3, 2)->nullable();
             $table->string('goal');
             $table->timestamps();
         });
